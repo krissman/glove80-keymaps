@@ -1,42 +1,16 @@
-// NOTE: Use the `#define` settings below to customize this keymap!
-// For example, here are the main optional features you can enable:
-#define DIFFICULTY_LEVEL  0 // 0:custom, 1:easy -> 5:hard (see below)
-#define ENFORCE_BILATERAL   // cancels single-handed home row mod+tap
-#define WORLD_USE_COMPOSE   // use native Compose in place of Unicode
+// NOTE: Use the many #define settings below to customize this keymap!
+#define OPERATING_SYSTEM 'L' // choose 'L'inux, 'M'acOS, or 'W'indows
+#define DIFFICULTY_LEVEL  0  // 0:custom, 1:easy -> 5:hard (see below)
+#define ENFORCE_BILATERAL    // cancels single-handed home row mod+tap
+#define WORLD_USE_COMPOSE    // use native Compose in place of Unicode
 // TIP: Add more setting overrides here instead of editing them below.
 
 //////////////////////////////////////////////////////////////////////////////
 //
-// Sunaku's Keymap v35 -- "Glorious Engrammer"
+// Sunaku's Keymap v36 -- "Glorious Engrammer"
 // - https://github.com/sunaku/glove80-keymaps
 //
 //////////////////////////////////////////////////////////////////////////////
-
-//
-// DIFFICULTY_LEVEL specifies your level of expertise with this keymap.
-// It's meant to help newcomers gradually work their way up to mastery.
-// You can disable this setting by omitting it or assigning a `0` zero.
-//
-// #define DIFFICULTY_LEVEL 0 // custom (see defaults below)
-// #define DIFFICULTY_LEVEL 1 // novice (500ms)
-// #define DIFFICULTY_LEVEL 2 // slower (400ms)
-// #define DIFFICULTY_LEVEL 3 // normal (300ms)
-// #define DIFFICULTY_LEVEL 4 // faster (200ms)
-// #define DIFFICULTY_LEVEL 5 // expert (100ms)
-//
-#if defined(DIFFICULTY_LEVEL) && DIFFICULTY_LEVEL > 0
-#define DIFFICULTY_THRESHOLD ((6-DIFFICULTY_LEVEL)*100)
-<%
-  %w[ HOMEY INDEX PLAIN SPACE ].each do |category|
-    setting = "#{category}_HOLDING_TIME"
-%>
-#ifndef <%= setting %>
-#define <%= setting %> DIFFICULTY_THRESHOLD
-#endif
-<%
-  end
-%>
-#endif
 
 //
 // OPERATING_SYSTEM defines which operating system you intend to use
@@ -44,6 +18,17 @@
 //
 // - https://zmk.dev/docs/codes
 // - https://en.wikipedia.org/wiki/Table_of_keyboard_shortcuts
+//
+// This setting also affects the UNICODE() function defined below, as
+// each OS has different shortcuts for typing Unicode hex characters.
+//
+// NOTE: You may need to enable Unicode hexadecimal input in your OS:
+// - (macOS) https://sevenseacat.net/posts/2018/unicode-in-qmk-on-osx/
+// - (Linux) https://help.ubuntu.com/stable/ubuntu-help/tips-specialchars.html.en#ctrlshiftu
+// - (Windows) https://github.com/samhocevar/wincompose
+//
+// Specifically, Windows users should be running the WinCompose tool,
+// which lets you type Unicode characters via hexadecimal codepoints.
 //
 #ifndef OPERATING_SYSTEM
 <%
@@ -199,8 +184,8 @@
   end
 
   layers = keymap["layer_names"].zip(keymap["layers"]).to_h
-  alpha_layers_count = keymap["layer_names"].find_index("Typing")
-  ALPHA_LAYERS = layers.first(alpha_layers_count).each do |layer_name, layer_keys|
+  ALPHA_LAYERS_COUNT = keymap["layer_names"].find_index("Typing")
+  ALPHA_LAYERS = layers.first(ALPHA_LAYERS_COUNT).each do |layer_name, layer_keys|
     layer_constant = "LAYER_#{layer_name}"
 %>
 #if defined(<%= layer_constant %>) && <%= layer_constant %> == 0
@@ -260,6 +245,22 @@ combos {
         layers = <0 LAYER_Gaming>;
     };
     #endif
+
+    #ifdef _A_TAB
+    combo_alt_tab_switcher {
+        timeout-ms = <COMBO_FIRING_DECAY>;
+        key-positions = <POS_LH_T4 POS_LH_T1>;
+        bindings = <&mod_tab_chord _A_TAB LAYER_Cursor>;
+        layers = <<%= (0...ALPHA_LAYERS_COUNT).to_a.join(" ") %>>;
+    };
+    #endif
+
+    combo_ctrl_tab_switcher {
+        timeout-ms = <COMBO_FIRING_DECAY>;
+        key-positions = <POS_LH_T4 POS_LH_T5>;
+        bindings = <&mod_tab_chord LCTL LAYER_Cursor>;
+        layers = <<%= (0...ALPHA_LAYERS_COUNT).to_a.join(" ") %>>;
+    };
 };
 
 behaviors {
@@ -271,6 +272,38 @@ behaviors {
     // - https://github.com/urob/zmk-config#timeless-homerow-mods
     //
     //////////////////////////////////////////////////////////////////////////
+
+    //
+    // DIFFICULTY_LEVEL specifies your level of expertise with this keymap.
+    // It's meant to help newcomers gradually work their way up to mastery.
+    // You can disable this setting by omitting it or assigning a `0` zero.
+    //
+    // #define DIFFICULTY_LEVEL 0 // custom (see defaults below)
+    // #define DIFFICULTY_LEVEL 1 // novice (500ms)
+    // #define DIFFICULTY_LEVEL 2 // slower (400ms)
+    // #define DIFFICULTY_LEVEL 3 // normal (300ms)
+    // #define DIFFICULTY_LEVEL 4 // faster (200ms)
+    // #define DIFFICULTY_LEVEL 5 // expert (100ms)
+    //
+    #if defined(DIFFICULTY_LEVEL) && DIFFICULTY_LEVEL > 0
+    #define DIFFICULTY_LEVEL_HOLDING_TIME  ((6 - DIFFICULTY_LEVEL) * 100)
+    #define DIFFICULTY_LEVEL_STREAK_DECAY (((6 - DIFFICULTY_LEVEL) *  50) + 100)
+    <%
+      emit_setting_ifndef = lambda do |name, value|
+    %>
+    #ifndef <%= name %>
+    #define <%= name %> <%= value %>
+    #endif
+    <%
+      end
+
+      %w[ HOMEY INDEX PLAIN SPACE ].each do |category|
+        %w[ HOLDING_TIME STREAK_DECAY ].each do |setting|
+          emit_setting_ifndef.("#{category}_#{setting}", "DIFFICULTY_LEVEL_#{setting}")
+        end
+      end
+    %>
+    #endif
 
     //
     // ENFORCE_BILATERAL cancels out single-handed home row mods activation by
@@ -359,7 +392,7 @@ behaviors {
     // (i.e. "register" them) for mod-click mouse usage (e.g. Ctrl-Click).
     //
     #ifndef HOMEY_HOLDING_TIME
-    #define HOMEY_HOLDING_TIME 270 // TAPPING_TERM + ALLOW_CROSSOVER_AFTER
+    #define HOMEY_HOLDING_TIME 240 // TAPPING_TERM + ALLOW_CROSSOVER_AFTER
     #endif
 
     //
@@ -368,7 +401,7 @@ behaviors {
     // unintended activation of home row mods when you're actively typing.
     //
     #ifndef HOMEY_STREAK_DECAY
-    #define HOMEY_STREAK_DECAY 250
+    #define HOMEY_STREAK_DECAY 160
     #endif
 
     //
@@ -436,7 +469,7 @@ behaviors {
     // (i.e. "register" them) for mod-click mouse usage (e.g. Shift-Click).
     //
     #ifndef INDEX_HOLDING_TIME
-    #define INDEX_HOLDING_TIME 170
+    #define INDEX_HOLDING_TIME 180
     #endif
 
     //
@@ -445,7 +478,7 @@ behaviors {
     // unintended activation of home row mods when you're actively typing.
     //
     #ifndef INDEX_STREAK_DECAY
-    #define INDEX_STREAK_DECAY 150
+    #define INDEX_STREAK_DECAY 100
     #endif
 
     //
@@ -651,21 +684,13 @@ behaviors {
         HOME_ROW_MOD_SETTINGS.each do |suffix|
           finger_setting = format_constant(finger, suffix)
           finger_chord_setting = format_constant(finger, :chord, suffix)
-    %>
-    #ifndef <%= finger_setting %>
-    #define <%= finger_setting %> HOMEY_<%= suffix %>
-    #endif
-    #ifndef <%= finger_chord_setting %>
-    #define <%= finger_chord_setting %> CHORD_<%= suffix %>
-    #endif
-    <%
+
+          emit_setting_ifndef.(finger_setting, "HOMEY_#{suffix}")
+          emit_setting_ifndef.(finger_chord_setting, "CHORD_#{suffix}")
+
           HANDS.each do |hand|
             hand_finger_chord_setting = format_constant(hand, finger, :chord, suffix)
-    %>
-    #ifndef <%= hand_finger_chord_setting %>
-    #define <%= hand_finger_chord_setting %> <%= finger_chord_setting %>
-    #endif
-    <%
+            emit_setting_ifndef.(hand_finger_chord_setting, finger_chord_setting)
           end
         end
       end
@@ -688,16 +713,11 @@ behaviors {
             end
 
           inherit = format_constant(*inherit_components)
-    %>
-    #ifndef <%= setting %>
-    #define <%= setting %> <%= inherit %>
-    #endif
-    <%
+          emit_setting_ifndef.(setting, inherit)
         end
 
         for target_variant in [nil, :_bilateral] do
     %>
-    <%= "#ifdef ENFORCE_BILATERAL" if target_variant %>
     <%= target %><%= target_variant %>: homey_<%= target %><%= target_variant %> {
         compatible = "zmk,behavior-hold-tap";
         flavor = <%= source.upcase %>_HOLDING_TYPE;
@@ -725,7 +745,6 @@ behaviors {
           end
         %>
     };
-    <%= "#endif" if target_variant %>
     <%
         end
 
@@ -737,7 +756,6 @@ behaviors {
         else
           constant = format_constant(hand, finger)
     %>
-    #ifdef ENFORCE_BILATERAL
     <%= target %>_hold: homey_<%= target %>_hold {
         compatible = "zmk,behavior-macro-one-param";
         wait-ms = <0>;
@@ -745,12 +763,16 @@ behaviors {
         #binding-cells = <1>;
         bindings
             = <&macro_param_1to1>
-            , <&macro_press &kp MACRO_PLACEHOLDER
-                            &mo LAYER_<%= target_CamelCase %>>
+            , <&macro_press &kp MACRO_PLACEHOLDER>
+            #ifdef LAYER_<%= target_CamelCase %>
+            , <&macro_press &mo LAYER_<%= target_CamelCase %>>
+            #endif
             , <&macro_pause_for_release>
             , <&macro_param_1to1>
-            , <&macro_release &kp MACRO_PLACEHOLDER
-                              &mo LAYER_<%= target_CamelCase %>>
+            , <&macro_release &kp MACRO_PLACEHOLDER>
+            #ifdef LAYER_<%= target_CamelCase %>
+            , <&macro_release &mo LAYER_<%= target_CamelCase %>>
+            #endif
             ;
     };
     <%= target %>_tap: homey_<%= target %>_tap {
@@ -769,7 +791,6 @@ behaviors {
             , <&macro_tap &kp MACRO_PLACEHOLDER>
             ;
     };
-    #endif
     #define <%= target_CamelCase %>(key, layer_index) <%= target_CamelCase %>_unroll(layer_index) (key)
     #define <%= target_CamelCase %>_unroll(layer_index) <%= target_CamelCase %>_concat(<%= target_CamelCase %>_layer, layer_index)
     #define <%= target_CamelCase %>_concat(prefix, layer_index) prefix ## layer_index
@@ -943,6 +964,21 @@ behaviors {
     #define STICKY_1SHOT_DECAY 500
     #endif
 
+    //
+    // STICKY_HOLDING_TIME defines how long you need to hold (milliseconds)
+    // sticky one-shot keys in order to trigger their hold (not tap) action.
+    //
+    #ifndef STICKY_HOLDING_TIME
+    #define STICKY_HOLDING_TIME CHORD_HOLDING_TIME
+    #endif
+
+    sticky_key_modtap: sticky_key_modtap {
+        compatible = "zmk,behavior-hold-tap";
+        flavor = "tap-preferred";
+        tapping-term-ms = <STICKY_HOLDING_TIME>;
+        #binding-cells = <2>;
+        bindings = <&kp>, <&sticky_key_oneshot>;
+    };
     sticky_key_oneshot: sticky_key_oneshot_macro {
         compatible = "zmk,behavior-macro-one-param";
         wait-ms = <0>;
@@ -1151,171 +1187,6 @@ macros {
     //#define WORLD_USE_COMPOSE
 
     //
-    // UNICODE_TARGET_OS defines which operating system you're targeting
-    // for the UNICODE() preprocessor macro to be used on, since each OS
-    // has different shortcuts for typing Unicode characters as hexcodes.
-    //
-    // NOTE: You may need to enable Unicode hexadecimal input in your OS:
-    // - (macOS) https://sevenseacat.net/posts/2018/unicode-in-qmk-on-osx/
-    // - (Linux) https://help.ubuntu.com/stable/ubuntu-help/tips-specialchars.html.en#ctrlshiftu
-    // - (Windows) https://github.com/samhocevar/wincompose
-    //
-    // Specifically, Windows users should be running the WinCompose tool,
-    // which lets you type Unicode characters via hexadecimal codepoints.
-    //
-    #ifndef UNICODE_TARGET_OS
-    #define UNICODE_TARGET_OS OPERATING_SYSTEM
-    #endif
-    <%
-      def format_keystrokes_for_unicode(keystrokes, os)
-        send("format_keystrokes_for_#{os}_unicode", keystrokes)
-      rescue NameError
-        raise NotImplementedError, "#{os} is not yet supported"
-      end
-
-      def format_keystrokes_for_linux_unicode(keystrokes)
-        "UNICODE_SEQ_LINUX(#{
-          strip_leading_zeroes_from_keystrokes(keystrokes)
-        })"
-      end
-
-      def format_keystrokes_for_macos_unicode(keystrokes)
-        "UNICODE_SEQ_MACOS(#{keystrokes})"
-      end
-
-      def format_keystrokes_for_windows_unicode(keystrokes)
-        "UNICODE_SEQ_WINDOWS(#{
-          strip_leading_zeroes_from_keystrokes(keystrokes)
-        })"
-      end
-
-      def strip_leading_zeroes_from_keystrokes(keystrokes)
-        keystrokes.sub(/^(&kp N0 ?)+/, '')
-      end
-
-      def keystrokes_from_character(character)
-        hexcodepoint = hexcodepoint_from_character(character)
-        keystrokes = keystrokes_from_hexcodepoint(hexcodepoint)
-      end
-
-      def hexcodepoint_from_character(character)
-        case character.codepoints
-        in [codepoint]
-          sprintf("%04X", codepoint)
-        end
-      end
-
-      def keystrokes_from_hexcodepoint(hexcodepoint)
-        hexcodepoint.chars.map do |hexbyte|
-          keycode = keycode_from_hexbyte(hexbyte)
-          keystroke = keystroke_from_keycode(keycode)
-        end.join(" ")
-      end
-
-      def keycode_from_hexbyte(hexbyte)
-        case hexbyte
-        when "0".."9" then "N" + hexbyte
-        else hexbyte
-        end
-      end
-
-      def keystroke_from_keycode(keycode)
-        "&kp #{keycode}"
-      end
-
-      emit_zmk_mod_morph = lambda do |id, plain, morphed, modifiers|
-    %>
-    <%= id %>: <%= id %> {
-        compatible = "zmk,behavior-mod-morph";
-        #binding-cells = <0>;
-        bindings = <&<%= plain %>>, <&<%= morphed %>>;
-        mods = <<%= modifiers %>>;
-    };
-    <%
-      end
-
-      def resolve_localized_keystrokes(localized, os)
-        STDOUT.flush
-        keycodes =
-          case os
-          when :linux
-            localized.sub(/^COMPOSE\b/, '')
-          when :macos
-            localized
-          when :windows
-            localized.sub(/^ALT\+/, '').gsub(/\d/, 'KP_N\& ')
-          end
-          .split
-
-        keystrokes = keycodes.map{ |key| "&kp #{key}" }.join(' ')
-
-        ["COMPOSE_SEQ_#{os.to_s.upcase}(#{keystrokes})"]
-      end
-
-      emit_unicode_macro = lambda do |id, character|
-    %>
-    UNICODE(<%= id %>, /* <%= character %> */
-    <%
-        OPERATING_SYSTEMS.each_with_index do |(os, os_char), os_index|
-          sequence = character.chars.map do |character|
-            keystrokes = keystrokes_from_character(character)
-            format_keystrokes_for_unicode(keystrokes, os)
-          end
-
-          if sequence.length > 1
-            sequence.insert(1, "<&macro_wait_time UNICODE_SEQ_DELAY>")
-          end
-
-          localized_sequence =
-            # FIXME: global variable; pass it somehow instead
-            if localized = $localizing.dig(character, os.to_s)
-              resolve_localized_keystrokes(localized, os)
-            end
-    %>
-      #<%= "el" if os_index > 0 %>if UNICODE_TARGET_OS == <%= os_char %>
-    <%
-          if localized_sequence
-    %>
-        #ifdef WORLD_USE_COMPOSE
-        <%= localized_sequence.join(", ") %>
-        #else
-    <%
-          end
-    %>
-        <%= sequence.join(", ") %>
-    <%
-          if localized_sequence
-    %>
-        #endif
-    <%
-          end
-    %>
-      <%= "#endif" if os_index + 1 == OPERATING_SYSTEMS.length %>
-    <%
-        end
-    %>
-    )
-    <%
-      end
-
-      EMITTED_UNICODE_MACROS = {}
-      emit_unicode_macro_once = lambda do |id, character|
-        if emitted_id = EMITTED_UNICODE_MACROS[character]
-          emitted_id
-        else
-          emit_unicode_macro.(id, character)
-          EMITTED_UNICODE_MACROS[character] = id
-        end
-      end
-
-      emit_at_root_level = lambda do |&block|
-        # HACK: this is an SQL injection style attempt to temporarily escape
-        # to the root level of the DTSI to alias things under new shortnames
-        %>/*HACK*/};<% block.() %><%= "\n" %>/*HACK*//{<%
-      end
-    %>
-
-    //
     // UNICODE_TAP_DELAY defines how long the macro waits (milliseconds)
     // between keystrokes while inputting the Unicode codepoint shortcut.
     //
@@ -1368,7 +1239,7 @@ macros {
     //
     #ifndef UNICODE_SEQ_WINDOWS
     #define UNICODE_SEQ_WINDOWS(keystrokes) \
-        <&macro_tap &kp RA(U) keystrokes &kp ENTER>
+        <&macro_tap &kp RALT &kp U keystrokes &kp ENTER>
     #endif
 
     //
@@ -1379,6 +1250,25 @@ macros {
     //
     // See xkeyboard-config(7) for possible choices for the Compose key:
     // https://manpages.debian.org/stable/xkb-data/xkeyboard-config.7.en.html#Position_of_Compose_key
+    //
+    // #define COMPOSE_KEY_LINUX RALT            // compose:ralt
+    // #define COMPOSE_KEY_LINUX LGUI            // compose:lwin
+    // #define COMPOSE_KEY_LINUX RA(LGUI)        // compose:lwin-altgr
+    // #define COMPOSE_KEY_LINUX RGUI            // compose:rwin
+    // #define COMPOSE_KEY_LINUX RA(RGUI)        // compose:rwin-altgr
+    // #define COMPOSE_KEY_LINUX K_MENU          // compose:menu
+    // #define COMPOSE_KEY_LINUX RA(K_MENU)      // compose:menu-altgr
+    // #define COMPOSE_KEY_LINUX LCTL            // compose:lctrl
+    // #define COMPOSE_KEY_LINUX RA(LCTL)        // compose:lctrl-altgr
+    // #define COMPOSE_KEY_LINUX RCTL            // compose:rctrl
+    // #define COMPOSE_KEY_LINUX RA(RCTL)        // compose:rctrl-altgr
+    // #define COMPOSE_KEY_LINUX CAPS            // compose:caps
+    // #define COMPOSE_KEY_LINUX RA(CAPS)        // compose:caps-altgr
+    // #define COMPOSE_KEY_LINUX NON_US_BSLH     // compose:102
+    // #define COMPOSE_KEY_LINUX RA(NON_US_BSLH) // compose:102-altgr
+    // #define COMPOSE_KEY_LINUX PAUSE_BREAK     // compose:paus
+    // #define COMPOSE_KEY_LINUX PSCRN           // compose:prsc
+    // #define COMPOSE_KEY_LINUX SLCK            // compose:sclk
     //
     #ifndef COMPOSE_KEY_LINUX
     #define COMPOSE_KEY_LINUX RALT
@@ -1409,6 +1299,242 @@ macros {
         <&macro_tap keystrokes>, \
         <&macro_release &kp LALT>
     #endif
+
+    #if OPERATING_SYSTEM == <%= OPERATING_SYSTEMS[:linux] %>
+        #define UNICODE_MORPH_MODS (MOD_LCTL|MOD_LSFT)
+    #elif OPERATING_SYSTEM == <%= OPERATING_SYSTEMS[:macos] %>
+        #define UNICODE_MORPH_MODS MOD_LALT
+    #elif OPERATING_SYSTEM == <%= OPERATING_SYSTEMS[:windows] %>
+        #define UNICODE_MORPH_MODS MOD_RALT
+    #endif
+
+    #if OPERATING_SYSTEM == <%= OPERATING_SYSTEMS[:linux] %>
+        // $ grep "compose:" /usr/share/X11/xkb/rules/base.lst
+        // compose:ralt         Right Alt
+        #if COMPOSE_KEY_LINUX == RALT
+            #define COMPOSE_MORPH_MODS MOD_RALT
+        // compose:lwin         Left Win
+        #elif COMPOSE_KEY_LINUX == LGUI
+            #define COMPOSE_MORPH_MODS MOD_LGUI
+        // compose:lwin-altgr   3rd level of Left Win
+        #elif COMPOSE_KEY_LINUX == RA(LGUI)
+            #define COMPOSE_MORPH_MODS (MOD_LGUI|MOD_RALT)
+        // compose:rwin         Right Win
+        #elif COMPOSE_KEY_LINUX == RGUI
+            #define COMPOSE_MORPH_MODS MOD_RGUI
+        // compose:rwin-altgr   3rd level of Right Win
+        #elif COMPOSE_KEY_LINUX == RA(RGUI)
+            #define COMPOSE_MORPH_MODS (MOD_RGUI|MOD_RALT)
+        // compose:menu         Menu
+        // compose:menu-altgr   3rd level of Menu
+        #elif COMPOSE_KEY_LINUX == RA(K_MENU)
+            #define COMPOSE_MORPH_MODS MOD_RALT
+        // compose:lctrl        Left Ctrl
+        #elif COMPOSE_KEY_LINUX == LCTL
+            #define COMPOSE_MORPH_MODS MOD_LCTL
+        // compose:lctrl-altgr  3rd level of Left Ctrl
+        #elif COMPOSE_KEY_LINUX == RA(LCTL)
+            #define COMPOSE_MORPH_MODS (MOD_LCTL|MOD_RALT)
+        // compose:rctrl        Right Ctrl
+        #elif COMPOSE_KEY_LINUX == RCTL
+            #define COMPOSE_MORPH_MODS MOD_RCTL
+        // compose:rctrl-altgr  3rd level of Right Ctrl
+        #elif COMPOSE_KEY_LINUX == RA(RCTL)
+            #define COMPOSE_MORPH_MODS (MOD_RCTL|MOD_RALT)
+        // compose:caps         Caps Lock
+        // compose:caps-altgr   3rd level of Caps Lock
+        #elif COMPOSE_KEY_LINUX == RA(CAPS)
+            #define COMPOSE_MORPH_MODS MOD_RALT
+        // compose:102          The "&lt; &gt;" key
+        // compose:102-altgr    3rd level of the "&lt; &gt;" key
+        #elif COMPOSE_KEY_LINUX == RA(NON_US_BSLH)
+            #define COMPOSE_MORPH_MODS MOD_RALT
+        // compose:paus         Pause
+        // compose:prsc         PrtSc
+        // compose:sclk         Scroll Lock
+        #else
+            #define COMPOSE_MORPH_MODS 0
+        #endif
+    #elif OPERATING_SYSTEM == <%= OPERATING_SYSTEMS[:macos] %>
+        #define COMPOSE_MORPH_MODS 0
+    #elif OPERATING_SYSTEM == <%= OPERATING_SYSTEMS[:windows] %>
+        #define COMPOSE_MORPH_MODS MOD_LALT
+    #endif
+
+    <%
+      def format_keystrokes_for_unicode(keystrokes, os)
+        send("format_keystrokes_for_#{os}_unicode", keystrokes)
+      rescue NameError
+        raise NotImplementedError, "#{os} is not yet supported"
+      end
+
+      def format_keystrokes_for_linux_unicode(keystrokes)
+        "UNICODE_SEQ_LINUX(#{
+          strip_leading_zeroes_from_keystrokes(keystrokes)
+        })"
+      end
+
+      def format_keystrokes_for_macos_unicode(keystrokes)
+        "UNICODE_SEQ_MACOS(#{keystrokes})"
+      end
+
+      def format_keystrokes_for_windows_unicode(keystrokes)
+        # prepend a single zero to prevent shorthand sequence
+        # expansion, such as "RA(U) A" being converted into ă
+        # https://github.com/samhocevar/wincompose/issues/323
+        "UNICODE_SEQ_WINDOWS(&kp N0 #{
+          strip_leading_zeroes_from_keystrokes(keystrokes)
+        })"
+      end
+
+      def strip_leading_zeroes_from_keystrokes(keystrokes)
+        keystrokes.sub(/^(&kp N0 ?)+/, '')
+      end
+
+      def keystrokes_from_character(character, os)
+        hexcodepoint = hexcodepoint_from_character(character, os)
+        keystrokes = keystrokes_from_hexcodepoint(hexcodepoint)
+      end
+
+      def hexcodepoint_from_character(character, os)
+        case character.codepoints
+        in [codepoint]
+          # macOS expects two UTF-16 instead UTF-32
+          # https://apple.stackexchange.com/a/183056
+          if os == :macos && codepoint >= 0x10000
+            codepoint -= 0x10000
+            high_surrogate = 0xD800 + (codepoint >> 10)
+            low_surrogate = 0xDC00 + (codepoint & 0x3FF)
+            sprintf("%04X%04X", high_surrogate, low_surrogate)
+          else
+            sprintf("%04X", codepoint)
+          end
+        end
+      end
+
+      def keystrokes_from_hexcodepoint(hexcodepoint)
+        hexcodepoint.chars.map do |hexbyte|
+          keycode = keycode_from_hexbyte(hexbyte)
+          keystroke = keystroke_from_keycode(keycode)
+        end.join(" ")
+      end
+
+      def keycode_from_hexbyte(hexbyte)
+        case hexbyte
+        when "0".."9" then "N" + hexbyte
+        else hexbyte
+        end
+      end
+
+      def keystroke_from_keycode(keycode)
+        "&kp #{keycode}"
+      end
+
+      emit_zmk_mod_morph = lambda do |id, plain, morphed, modifiers|
+    %>
+    <%= id %>: <%= id %> {
+        compatible = "zmk,behavior-mod-morph";
+        #binding-cells = <0>;
+        bindings = <&<%= plain %>>, <&<%= morphed %>>;
+        mods = <<%= modifiers %>>;
+    };
+    <%
+      end
+
+      def resolve_localized_keystrokes(localized, os)
+        keycodes =
+          case os
+          when :linux
+            localized.sub(/^COMPOSE\b/, '')
+          when :macos
+            localized
+          when :windows
+            localized.sub(/^ALT\+/, '').gsub(/\d/, 'KP_N\& ')
+          end
+          .split
+
+        keystrokes = keycodes.map{ |key| "&kp #{key}" }.join(' ')
+
+        ["COMPOSE_SEQ_#{os.to_s.upcase}(#{keystrokes})"]
+      end
+
+      emit_unicode_macro = lambda do |id, character|
+        macro_id = "#{id}_macro"
+        has_compose = "WORLD_USE_COMPOSE_FOR_#{id}"
+    %>
+    UNICODE(<%= macro_id %>, /* <%= character %> */
+    <%
+        # FIXME: global variable; pass it somehow instead
+        localizations = $localizing[character]
+
+        OPERATING_SYSTEMS.each_with_index do |(os, os_char), os_index|
+          sequence = character.chars.map do |character|
+            keystrokes = keystrokes_from_character(character, os)
+            format_keystrokes_for_unicode(keystrokes, os)
+          end
+
+          if sequence.length > 1
+            sequence.insert(1, "<&macro_wait_time UNICODE_SEQ_DELAY>")
+          end
+    %>
+      #<%= "el" if os_index > 0 %>if OPERATING_SYSTEM == <%= os_char %>
+    <%
+          localization_for_os = localizations[os.to_s] if localizations
+
+          if localization_for_os
+    %>
+        #ifdef WORLD_USE_COMPOSE
+        #define <%= has_compose %>
+        <%=
+          localized_keystrokes = resolve_localized_keystrokes(localization_for_os, os)
+          localized_keystrokes.join(", ")
+        %>
+        #else
+    <%
+          end
+    %>
+        <%= sequence.join(", ") %>
+    <%
+          if localization_for_os
+    %>
+        #endif
+    <%
+          end
+    %>
+      <%= "#endif" if os_index + 1 == OPERATING_SYSTEMS.length %>
+    <%
+        end
+    %>
+    )
+    <%
+        mask = [
+          "(~(", # the negation suppresses any unrelated mods
+            "#ifdef #{has_compose}",
+              "COMPOSE_MORPH_MODS",
+            "#else",
+              "UNICODE_MORPH_MODS",
+            "#endif",
+          "))"
+        ].join("\n")
+        emit_zmk_mod_morph.(id, macro_id, macro_id, mask)
+      end
+
+      EMITTED_UNICODE_MACROS = {}
+      emit_unicode_macro_once = lambda do |id, character|
+        if emitted_id = EMITTED_UNICODE_MACROS[character]
+          emitted_id
+        else
+          emit_unicode_macro.(id, character)
+          EMITTED_UNICODE_MACROS[character] = id
+        end
+      end
+
+      emit_at_root_level = lambda do |&block|
+        # HACK: this is an SQL injection style attempt to temporarily escape
+        # to the root level of the DTSI to alias things under new shortnames
+        %>/*HACK*/};<% block.() %><%= "\n" %>/*HACK*//{<%
+      end
+    %>
 
     //
     // NOTE: edit the world.yaml file and run `rake` to generate this:

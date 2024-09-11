@@ -1,33 +1,50 @@
 # "Glorious Engrammer" keymap for MoErgo Glove80
 
-This is [my Glove80][1] keymap featuring the [Engram][2]/[mer][3]
-layouts with [Miryoku][4]-style layers and [home row mods][5].
-Other layouts (QWERTY, Dvorak, Colemak/DH, etc.) and
-familiar keys (arrows, pinky shifts, function row)
-are also provided as "training wheels" to aid your
-transition to the full glory, at your convenience.
+This is [my Glove80] keymap featuring the [Engram] and [Engrammer] layouts with
+[Miryoku]-style layers and [home row mods].  Other layouts (**QWERTY**, Dvorak,
+Colemak/DH, etc.) and familiar keys (arrows, pinky shifts, function row) are
+also provided as "training wheels" to aid your transition to the full glory.
 
->![Photograph of my Glove80 with Engrammer layout](https://raw.githubusercontent.com/sunaku/sunaku.github.io/master/moergo-glove80-keyboard-photograph.jpg)
+[my Glove80]:    https://sunaku.github.io/moergo-glove80-keyboard.html
+[Engram]:        https://sunaku.github.io/engram-keyboard-layout.html
+[Engrammer]:     https://sunaku.github.io/engrammer-keyboard-layout.html
+[Miryoku]:       https://github.com/manna-harbour/miryoku
+[home row mods]: https://sunaku.github.io/home-row-mods.html
 
-[1]: https://sunaku.github.io/moergo-glove80-keyboard.html
-[2]: https://sunaku.github.io/engram-keyboard-layout.html
-[3]: https://sunaku.github.io/engrammer-keyboard-layout.html
-[4]: https://github.com/manna-harbour/miryoku
-[5]: https://sunaku.github.io/home-row-mods.html
+## Keymap
+
+Version 36 (2024-03-21)
+- Changes: https://github.com/sunaku/glove80-keymaps/releases/v36
+- Release: https://my.glove80.com/#/layout/user/f4372744-fce9-4678-ac4b-3d8ef8768160
+
+### Legend
+
+See [interactive layer map][map] for overview and documentation.
+>NOTE: This is also available as a [printable PDF document][pdf].
+
+See [release notes][rel] for a visual overview of recent updates.
+
+[map]: https://sunaku.github.io/moergo-glove80-keyboard.html#layers
+[pdf]: https://sunaku.github.io/moergo-glove80-keyboard-layers.pdf
+[rel]: https://github.com/sunaku/glove80-keymaps/releases
+
+### Contents
 
 <!-- vim-markdown-toc GFM -->
 
-* [Keymap](#keymap)
-    * [Legend](#legend)
 * [Guide](#guide)
     * [Factory layout](#factory-layout)
     * [Operating system](#operating-system)
     * [Home row mods](#home-row-mods)
+        * [Difficulty level](#difficulty-level)
         * [One-shot shifts](#one-shot-shifts)
+        * [Bilateral combinations](#bilateral-combinations)
     * [Layer access keys](#layer-access-keys)
     * [Key auto-repeat](#key-auto-repeat)
     * [Alpha layouts](#alpha-layouts)
     * [Unicode and Emoji](#unicode-and-emoji)
+        * [OS-native compose](#os-native-compose)
+    * [Enabling mouse emulation](#enabling-mouse-emulation) 
 * [Installing](#installing)
     * [Flashing](#flashing)
 * [Upgrading](#upgrading)
@@ -42,34 +59,6 @@ transition to the full glory, at your convenience.
 * [License](#license)
 
 <!-- vim-markdown-toc -->
-
-## Keymap
-
-- https://my.glove80.com/#/layout/user/05c7da03-20bd-494e-a795-d382a5a96621
-
-### Legend
-
-See [interactive layer map][6] for overview and documentation.
->NOTE: This is also available as a [printable PDF document][7].
-
-See [release notes][8] for a visual overview of recent updates.
-
-[6]: https://sunaku.github.io/moergo-glove80-keyboard.html#layers
-[7]: https://sunaku.github.io/moergo-glove80-keyboard-layers.pdf
-[8]: https://github.com/sunaku/glove80-keymaps/releases
-
-[![Base layer](README/base-layer-diagram.png)](https://sunaku.github.io/moergo-glove80-keyboard.html#layers)
-[![Lower layer](README/lower-layer-diagram.png)](https://sunaku.github.io/moergo-glove80-keyboard.html#lower-layer)
-[![Cursor layer](README/cursor-layer-diagram.png)](https://sunaku.github.io/moergo-glove80-keyboard.html#cursor-layer)
-[![Number layer](README/number-layer-diagram.png)](https://sunaku.github.io/moergo-glove80-keyboard.html#number-layer)
-[![Function layer](README/function-layer-diagram.png)](https://sunaku.github.io/moergo-glove80-keyboard.html#function-layer)
-[![Emoji layer](README/emoji-layer-diagram.png)](https://sunaku.github.io/moergo-glove80-keyboard.html#emoji-layer)
-[![Symbol layer](README/symbol-layer-diagram.png)](https://sunaku.github.io/moergo-glove80-keyboard.html#symbol-layer)
-[![Mouse layer](README/mouse-layer-diagram.png)](https://sunaku.github.io/moergo-glove80-keyboard.html#mouse-layer)
-[![System layer](README/system-layer-diagram.png)](https://sunaku.github.io/moergo-glove80-keyboard.html#system-layer)
-[![World layer](README/world-layer-diagram.png)](https://sunaku.github.io/moergo-glove80-keyboard.html#world-layer)
-[![Typing layer](README/typing-layer-diagram.png)](https://sunaku.github.io/moergo-glove80-keyboard.html#typing-layer)
-[![Gaming layer](README/gaming-layer-diagram.png)](https://sunaku.github.io/moergo-glove80-keyboard.html#gaming-layer)
 
 ## Guide
 
@@ -95,7 +84,7 @@ First, let's configure this keymap to better suit your operating system by
 adding one of the following lines (just copy+paste whichever is appropriate)
 atop the "Custom Defined Behaviors" text box in your clone of this keymap:
 
-```dts
+```cpp
 #define OPERATING_SYSTEM 'L' // Linux
 #define OPERATING_SYSTEM 'M' // macOS
 #define OPERATING_SYSTEM 'W' // Windows
@@ -103,14 +92,11 @@ atop the "Custom Defined Behaviors" text box in your clone of this keymap:
 
 ### Home row mods
 
-Next, let's become familiar with the powerful concept of [home row mods][HRM],
-which are dual-function keys that send normal keycodes (such as the letter `A`
+Next, let's become familiar with the concept of [home row mods], which are
+dual-function keys that *either* send normal keycodes (such as the letter `A`
 or the number `1`) when tapped or modifiers (such as Shift or Ctrl) when held.
 
-![Concept diagram of *home row mods* on a row-staggered keyboard][HRM_diagram]
-
-[HRM]:         https://sunaku.github.io/home-row-mods.html
-[HRM_diagram]: https://sunaku.github.io/home-row-mods.png
+![Concept diagram of *home row mods* on a row-staggered keyboard](https://sunaku.github.io/home-row-mods.png)
 
 The diagram above shows the default "GACS" order of home row mods in this keymap:
 - "G" means `LGUI`, which is the Win key in Windows, Cmd in macOS, Super in Linux.
@@ -122,6 +108,34 @@ The diagram above shows the default "GACS" order of home row mods in this keymap
 the home row mods order will be automatically rearranged into "CAGS" because
 macOS shortcuts tend to use the Cmd key like Windows/Linux use the Ctrl key.
 
+#### Difficulty level
+
+In order to help ease your transition to using [home row mods], this keymap
+provides a difficulty level setting (like in a video game) that you can set:
+
+```cpp
+//
+// DIFFICULTY_LEVEL specifies your level of expertise with this keymap.
+// It's meant to help newcomers gradually work their way up to mastery.
+// You can disable this setting by omitting it or assigning a `0` zero.
+//
+#define DIFFICULTY_LEVEL 0 // custom (see defaults below)
+#define DIFFICULTY_LEVEL 1 // novice (500ms)
+#define DIFFICULTY_LEVEL 2 // slower (400ms)
+#define DIFFICULTY_LEVEL 3 // normal (300ms)
+#define DIFFICULTY_LEVEL 4 // faster (200ms)
+#define DIFFICULTY_LEVEL 5 // expert (100ms)
+```
+
+Unless you're already proficient in using home row mods, you might consider
+choosing an appropriate difficulty level to match your current abilities and
+gradually increase the difficulty level as you work your way up to mastery.
+
+On the contrary, you can disable the difficulty level feature altogether by
+removing the `#define DIFFICULTY_LEVEL` line or by setting its value to zero.
+Then, you can experience the default values of all settings (representing my
+personal fine-tuned configuration) or directly override them per your taste.
+
 #### One-shot shifts
 
 The Lower keys on the base layer provide one-shot sticky shift functionality,
@@ -129,9 +143,42 @@ whereby tapping them temporarily activates a sticky Shift that applies itself
 to the next key you tap.  This can be useful for single letter capitalization,
 such as for the frequent "I" in English or when typing camel/PascalCase names.
 
+#### Bilateral combinations
+
+In order to encourage proper touch-typing technique for shortcuts (where one
+hand holds modifiers while the other taps keys to be modified) and for a more
+natural typing experience that forgives [same-hand chords] and lingering holds,
+this keymap provides bilateral combinations enforcement as an optional feature:
+
+```cpp
+//
+// ENFORCE_BILATERAL cancels out single-handed home row mods activation by
+// releasing any currently pressed mods and replacing them with plain taps.
+//
+// NOTE: You may still encounter "flashing mods" where an operating system
+// action is triggered by the release of mods, such as LGUI which launches
+// the Windows Start Menu and LALT which opens the Microsoft Office Ribbon.
+//
+#define ENFORCE_BILATERAL
+```
+
+Why not just use one-handed shortcuts?  I visualize it this way: I'm trying to
+reach a cookie jar that is high up on a kitchen shelf, so I place one hand on
+the kitchen counter (the modifier-holding hand) to stabilize myself while I
+reach up for the jar with my other hand (the modified-key tapping hand). 🙋✨
+In contrast, one-handed shortcuts can be more strenuous as you have to contort
+your hand to hold a modifier _and_ tap modified keys; plus the act of holding a
+modifier limits the hand's range of motion when reaching for keys to be tapped.
+
+Nevertheless, if you still prefer using one-handed shortcuts, you can disable
+bilateral combinations enforcement by removing the `#define ENFORCE_BILATERAL`
+line and, optionally, deleting the bilateral combinations layers in the keymap.
+
+[same-hand chords]: https://sunaku.github.io/home-row-mods.html#same-hand-chords
+
 ### Layer access keys
 
-This keymap borrows heavily from the [legendary Miryoku][4] system, featuring:
+This keymap borrows heavily from the legendary [Miryoku] system, featuring:
 
 - Six specialized layers: Cursor, Number, Function, Symbol, Mouse, System
 - Layer access via thumb keys: Backspace, Delete, Escape, Enter, Tab, Space
@@ -196,7 +243,31 @@ may need to enable support for Unicode hexadecimal character input in your OS:
 - (Linux) https://help.ubuntu.com/stable/ubuntu-help/tips-specialchars.html.en#ctrlshiftu
 - (Windows) https://github.com/samhocevar/wincompose
 
-Specifically, Windows users need to be running the WinCompose tool linked above.
+See also: the `UNICODE_*_DELAY` settings and the `UNICODE_SEQ_*` functions.
+
+#### OS-native compose
+
+If you prefer using your operating system's built-in shortcuts (rather than
+Unicode) to type international characters in the World layer, activate this:
+
+```cpp
+//
+// WORLD_USE_COMPOSE uses OS-native Compose keycodes instead of Unicode
+// for characters in the "localizing" section of the `world.yaml` file.
+//
+#define WORLD_USE_COMPOSE
+```
+
+See also: the `COMPOSE_KEY_LINUX` setting and the `COMPOSE_SEQ_*` functions.
+
+### Enabling mouse emulation
+
+To enable mouse emulation through with the mouse layer, you need to select the PR23 beta firmware in the layout editor, and rebuild the layout. 
+
+![image](https://github.com/sunaku/glove80-keymaps/assets/26071571/25c66c06-93fe-4318-bb54-7a85e510e1fd)
+![image](https://github.com/sunaku/glove80-keymaps/assets/26071571/2e4bd618-7c04-41a9-a8dc-15bdc0c4cf7f)
+![image](https://github.com/sunaku/glove80-keymaps/assets/26071571/e8d1c849-ec87-4628-832f-c71d95060375)
+
 
 ## Installing
 
@@ -211,17 +282,18 @@ Open the [keymap link above](#keymap) and follow these instructions:
 
 ### Flashing
 
-- For the initial flash, follow "Loading new ZMK firmware onto your Glove80"
-(see page 28 of the [Glove80 User Guide]) or, if that doesn't work, try the
-"bootloader mass storage device mode" method (see page 31 in the user guide).
+- For the initial flash, see ["Loading new ZMK firmware onto your Glove80"](
+https://docs.moergo.com/glove80-user-guide/customizing-key-layout/#loading-new-zmk-firmware-onto-your-glove80
+) and use the ["Entering bootloader mass storage device mode on power-up"](
+https://docs.moergo.com/glove80-user-guide/customizing-key-layout/#entering-bootloader-mass-storage-device-mode-on-power-up
+) fail-safe on both halves.  Subsequent flashes can target just the left half.
 
 - If you're installing a different firmware version compared to what your
 keyboard currently has, then ⚠️ **after flashing both halves** ⚠️ perform a
-"Configuration Factory Reset" on both halves (see page 41 in the [Glove80 User
-Guide]) and then turn RGB effects on, watch them illuminate, and finally turn
-them back off.  This allows the newly installed firmware to take full effect.
-
-[Glove80 User Guide]: https://www.moergo.com/files/glove80-user-guide.pdf
+["Configuration Factory Reset and re-pair left & right halves procedure"](
+https://docs.moergo.com/glove80-user-guide/troubleshooting/#configuration-factory-reset-and-re-pairing-left-and-right-halves
+) on both halves and then turn RGB effects on, watch them illuminate, and
+finally turn them back off for the newly installed firmware to take effect.
 
 ## Upgrading
 
@@ -240,7 +312,7 @@ also available in the `*.dtsi` files provided in this Git repository.
 You can override the various `#define` settings that govern this keymap by
 adding them above the snippet in the "Custom Defined Behaviors" text box:
 
-```dts
+```cpp
 // add your overrides here, up at the very top:
 #define OPERATING_SYSTEM 'W' // windows
 #define EMOJI_HAIR_STYLE_PRESET 'C' // curly_hair
@@ -248,16 +320,11 @@ adding them above the snippet in the "Custom Defined Behaviors" text box:
 // ... rest of snippet goes here, unchanged ...
 ```
 
-For your reference, the following digram shows the default values for all
+For your reference, the following diagram shows the default values for all
 settings and how they inherit from each other, so you can override them
 together as a group (by inheritance) or each individually (fine-grained).
 
-<details>
-  <summary><b>Diagram:</b> Default values for #define settings</summary>
-
-  ![diagram](define.svg)
-
-</details>
+![Default values and inheritance for all `#define` settings](define.svg)
 
 #### Reordering home row mods
 
@@ -265,7 +332,7 @@ The `*_FINGER_MOD` settings specify which modifiers are used by home row mod
 keys. Miryoku's "GACS" (Win, Alt, Ctrl, Shift) order is the default -- unless
 you set `OPERATING_SYSTEM` to macOS, in which case Win and Ctrl are swapped.
 
-```dts
+```cpp
 #define PINKY_FINGER_MOD LGUI
 #define RING1_FINGER_MOD LALT
 #define RING2_FINGER_MOD RALT
@@ -276,9 +343,24 @@ you set `OPERATING_SYSTEM` to macOS, in which case Win and Ctrl are swapped.
 The above settings mirror finger-mod assignments across both hands, but you can
 also make them different through the following additional settings if you want:
 
-```dts
-#define LEFT_PINKY_MOD  RALT
+```cpp
+#define  LEFT_PINKY_MOD RALT
 #define RIGHT_PINKY_MOD LCTL
+```
+
+For completeness, here are all finger-mod settings available for customization:
+
+```cpp
+#define  LEFT_PINKY_MOD ...
+#define RIGHT_PINKY_MOD ...
+#define  LEFT_RING1_MOD ...
+#define RIGHT_RING1_MOD ...
+#define  LEFT_RING2_MOD ...
+#define RIGHT_RING2_MOD ...
+#define  LEFT_MIDDY_MOD ...
+#define RIGHT_MIDDY_MOD ...
+#define  LEFT_INDEX_MOD ...
+#define RIGHT_INDEX_MOD ...
 ```
 
 #### Fine-tuning the timing
@@ -290,13 +372,20 @@ adjust the `#define` time thresholds in the "Custom Defined Behaviors" snippet.
 
 ### Compiling from source
 
+>**NOTE:** If you're on Windows, try using [Ubuntu in WSL] for the following.
+
 1. Clone or download a copy of this Git repository (if you haven't already).
 
 2. Install dependencies OR skip this step if you have Docker on your system:
 
-       apt install rake graphviz
+   ```sh
+   add-apt-repository universe && apt update # may be needed if using Ubuntu 
+   apt install rake graphviz
+   ```
 
 3. In your copy of this repository, run `rake` OR `./rake` if using Docker.
+
+[Ubuntu in WSL]: https://ubuntu.com/desktop/wsl
 
 #### Unicode/Emoji characters
 
@@ -325,10 +414,10 @@ You don't need to change the per-finger layers (such as "LeftPinky") manually.
 
 ## Discussion
 
-Join the [`#glorious-engrammer`][9] channel on [MoErgo's discord server][10].
+Join the [`#glorious-engrammer`][ch] channel on [MoErgo's discord server][sv].
 
-[9]: https://discord.com/channels/877392805654306816/1111469812850380831
-[10]: https://www.moergo.com/discord
+[ch]: https://discord.com/channels/877392805654306816/1111469812850380831
+[sv]: https://www.moergo.com/discord
 
 ## License
 
